@@ -24,16 +24,14 @@ text_area = st.empty()
 stop = st.button(label="Stop", key="end_live_stream")
 
 # Function to detect action in a video frame
-def detect_action(last_letter, letter):
+def detect_action(letter):
     ret, frame = cap.read()
 
     img_for_pred = cv2.resize(frame, dsize=(64, 64)).astype('float32')
     result_arr = cnn_model.predict(np.expand_dims(img_for_pred, axis=0))[0]
     letter = folders[np.argmax(result_arr)]
 
-    last_letter+=letter
-
-    return last_letter, letter
+    return letter
 
 # To stream the live camera
 def live_stream():
@@ -54,8 +52,12 @@ letter = ""
 last_letter = ""
 while True:
     with cf.ThreadPoolExecutor() as executor:
-        detect_action_result = executor.submit(detect_action, last_letter, letter)
-        last_letter, letter = detect_action_result.result()
+        detect_action_result = executor.submit(detect_action, letter)
+        letter = detect_action_result.result()
+        if letter in ['del','space','nothing']:
+            last_letter += " "
+        else:
+            last_letter += letter
         text_area.write(last_letter)
 
         live_stream_result = executor.submit(live_stream)
