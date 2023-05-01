@@ -6,6 +6,7 @@ import concurrent.futures as cf
 import streamlit as st
 from keras.models import load_model
 
+
 cnn_model = load_model('cnn_model.h5')
 folders = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'del', 'nothing', 'space']
 
@@ -46,7 +47,7 @@ def live_stream():
         print("clicked stop")
         return frame, False
     
-    return frame, True
+    return frame, True 
 
 letter = ""
 last_letter = ""
@@ -68,6 +69,7 @@ while True:
         if not result:
             detect_action_result.cancel()
             live_stream_result.cancel()
+            text_area.empty()
             break
 
 # Release the video capture object and close the Streamlit app
