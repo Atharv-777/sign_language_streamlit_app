@@ -2,13 +2,19 @@ import streamlit as st
 import cv2
 import time
 import numpy as np
+import speech_recognition as sr
 import concurrent.futures as cf
 from keras.models import load_model
 from streamlit_option_menu import option_menu
 
 st.set_page_config(
-    page_icon="icons/translator.png",
-    page_title="Sign Language Interpreter"
+    page_icon="resources/icons/translator.png",
+    page_title="Sign Language Interpreter",
+    menu_items={
+        'Get Help': 'https://github.com/Atharv-777/sign_language_streamlit_app',
+        'Report a bug': "https://github.com/Atharv-777/sign_language_streamlit_app/issues/new",
+        'About': """### This is a Final Year Project from the students of Mumbai University, to help deaf/hearing impaired as well as non-hearing impaired people to communicate with each other """
+    }
 )
 
 cnn_model = load_model('model/cnn_model.h5')
@@ -26,14 +32,15 @@ st.markdown("""
 
 selected = option_menu(
     menu_title="Main Menu",
-    options=['Home','Sign-To-Text','Text-To-Sign'],
-    icons=['house','icons/sign-language','icons/animation'],
+    options=['Home','Sign-To-Text','Speech-To-Sign'],
+    icons=['house','camera-video','mic'],
     default_index=0,
     orientation="horizontal"
 )
 
+# Home section
 if selected == "Home":
-    st.title(":blue[Virtual] Sign Language Interpreter..")
+    st.title(":blue[Virtual] Sign Language Interpreter...")
     st.write('''
     &emsp; The Virtual Sign Language Interpreter is a :blue[_computer vision_] project that aims to bridge the communication gap between hearing-impaired and 
     non-hearing-impaired people. The project uses computer vision and deep learning to interpret sign language gestures and convert them 
@@ -41,12 +48,13 @@ if selected == "Home":
     &emsp; For converting Sign to Text, the system uses a camera to capture the sign language gestures made by a user and processes the images using 
     computer vision techniques such as object detection and tracking, feature extraction, and <a href="https://towardsdatascience.com/convolutional-neural-networks-explained-9cc5188c4939" style="text-decoration: none;">_Convolution_</a> 
     to recognize the gestures. The recognized gestures are then translated into spoken language or text, which can be understood by non-hearing-impaired people.<br>
-    &emsp; For converting text/speech to sign language, this system uses <a href = "https://cloud.ibm.com/catalog?category=ai" style="text-decoration: none;">_IBM's Watson AI_</a> 
-    for taking Speech input from the user and converting it into Text. IBM Watson's Speech-to-Text service supports a variety of languages and accents and can handle a wide range of audio inputs, from telephone-quality 
-    recordings to high-quality studio recordings. Once text is generated using Watson AI speech-to-text API, text is used to generate a animated video
-    which can be used by non-hearing-impaired people to convery their message to hearing-impaired/deaf people.''', unsafe_allow_html=True)
+    &emsp; For converting text/speech to sign language, this system uses <a href = "https://github.com/Uberi/speech_recognition" style="text-decoration: none;">_speech_recognition_</a>
+    module for taking Speech input from the user and converting it into Text. The "speech_recognition" library is a Python library that provides easy-to-use 
+    interfaces to speech recognition engines, such as Google Speech Recognition, IBM Speech to Text, and Sphinx. It allows users to easily add speech 
+    recognition capabilities to their Python applications. Once text is generated using Watson AI speech-to-text API, text is used to generate a animated
+    video which can be used by non-hearing-impaired people to convery their message to hearing-impaired/deaf people.''', unsafe_allow_html=True)
 
-
+# Sign to Text section
 if selected == "Sign-To-Text":
     folders = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'del', 'nothing', 'space']
 
@@ -57,9 +65,9 @@ if selected == "Sign-To-Text":
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
-    st.header("Sign Language to Text..")
+    st.header("Sign Language to Text")
 
-    # Create a canvas to display the video frames
+    # Create a canvas to display the video frames with a stop button at the bottom
     canvas = st.empty()
     text_area = st.empty()
     stop = st.button(label="Stop", key="end_live_stream")
@@ -117,6 +125,29 @@ if selected == "Sign-To-Text":
     cv2.destroyAllWindows()
 
 
+# Text-To-Sign Section
+if selected == "Speech-To-Sign":
+    st.header("Speech To Sign Language")
+    text = ""
+    start = st.button("Speak", key="start")
+    mic_text = st.empty()
+    # stop = st.button("Stop", key="stop")
+    rec = sr.Recognizer()
+    try:
+        if start:
+            with sr.Microphone() as source:
+                mic_text.write("Listening")
+                # print("Listening...")
+                audio = rec.listen(source)
+                text = rec.recognize_google(audio)
+            text = text.replace(" ", "-")
+            filename = f"resources/animation/{text}.mp4"
+            # file = f"animation/{text}.mp4"
+            _, container, _ = st.columns([1,3,1])
+            video_file = open(filename, "rb")
+            video_bytes = video_file.read()
+            container.video(video_bytes)
+    except:
+        mic_text.empty()
+        mic_text.write("Oops didn't catch you")
 
-if selected == "Text-To-Sign":
-    st.title(f"Selected {selected}")
