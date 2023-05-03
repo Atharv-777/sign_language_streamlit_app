@@ -9,7 +9,12 @@ from streamlit_option_menu import option_menu
 
 st.set_page_config(
     page_icon="resources/icons/translator.png",
-    page_title="Sign Language Interpreter"
+    page_title="Sign Language Interpreter",
+    menu_items={
+        'Get Help': 'https://github.com/Atharv-777/sign_language_streamlit_app',
+        'Report a bug': "https://github.com/Atharv-777/sign_language_streamlit_app/issues/new",
+        'About': """### This is a Final Year Project from the students of Mumbai University, to help deaf/hearing impaired as well as non-hearing impaired people to communicate with each other """
+    }
 )
 
 cnn_model = load_model('model/cnn_model.h5')
@@ -28,7 +33,7 @@ st.markdown("""
 selected = option_menu(
     menu_title="Main Menu",
     options=['Home','Sign-To-Text','Speech-To-Sign'],
-    icons=['house','resources/icons/sign-language','resources/icons/animation'],
+    icons=['house','camera-video','mic'],
     default_index=0,
     orientation="horizontal"
 )
